@@ -3,30 +3,35 @@ package ml.empee.configurator;
 import org.bukkit.configuration.ConfigurationSection;
 
 import lombok.Getter;
+import lombok.NonNull;
 
-public abstract class Config {
+public class Config {
 
-    @Getter
-    protected final Config parent;
-    protected ConfigurationSection configurationSection;
+  @Getter
+  protected final Config parent;
+  protected ConfigurationSection configurationSection;
 
-    protected Config(Config parent) {
-        this.parent = parent;
+  protected Config(Config parent) {
+    this.parent = parent;
+  }
+
+  public String getAbsolutePath() {
+    Config config = this;
+    StringBuilder path = new StringBuilder();
+    while (config.parent != null) {
+      path.insert(0, config.getPath() + ".");
+      config = config.parent;
     }
 
-    public String getAbsolutePath() {
-        Config config = this;
-        StringBuilder path = new StringBuilder();
-        while(config.parent != null) {
-            path.insert(0, config.getPath() + ".");
-            config = config.parent;
-        };
+    return config.getPath() + " / " + path;
+  }
 
-        return config.getPath() + " / " + path.toString();
-    }
+  public String getPath() {
+    return configurationSection.getCurrentPath();
+  }
 
-    public String getPath() {
-        return configurationSection.getCurrentPath();
-    }
+  public String getAbsolutePath(@NonNull String path) {
+    return getAbsolutePath() + (getParent() == null ? "" : ".") + path;
+  }
 
 }

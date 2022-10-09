@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Path {
 
-    String value();
-    boolean required() default false;
+  String value();
+
+  boolean required() default false;
 
 }
