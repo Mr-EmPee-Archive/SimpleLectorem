@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import ml.empee.configurator.annotations.Constraint;
 
-public class ConfigField {
+public final class ConfigField {
 
   @Getter
   private final Constraint constraints;
@@ -25,7 +25,7 @@ public class ConfigField {
   private final boolean required;
 
   @Builder
-  public ConfigField(Class<? extends Config> configClass, Field field, String configPath, boolean required) {
+  ConfigField(Class<? extends Config> configClass, Field field, String configPath, boolean required) {
     for (Method method : configClass.getDeclaredMethods()) {
 
       if (method.getName().equalsIgnoreCase("set" + field.getName())) {
