@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.bukkit.configuration.ConfigurationSection;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import ml.empee.configurator.annotations.Constraint;
@@ -17,10 +19,8 @@ import ml.empee.configurator.exceptions.ConfigurationProcessorException;
 import ml.empee.configurator.exceptions.ConstraintViolation;
 import ml.empee.configurator.exceptions.MalformedConfigurationException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigurationProcessor {
-
-  private ConfigurationProcessor() {
-  }
 
   private static final Field configurationSection;
 
@@ -33,7 +33,7 @@ public final class ConfigurationProcessor {
     }
   }
 
-  public static <T extends Config> T loadConfiguration(T config) {
+  static <T extends Config> T processConfiguration(T config) {
     Class<? extends Config> instanceClazz = config.getClass();
 
     List<ConfigField> configFields = getConfigFields(instanceClazz);
@@ -55,7 +55,7 @@ public final class ConfigurationProcessor {
           Constructor<?> constructor = parameterClass.getConstructor(String.class, Config.class, boolean.class);
           constructor.setAccessible(true);
 
-          value = loadConfiguration(
+          value = processConfiguration(
               (Config) constructor.newInstance(configField.getConfigPath(), config, configField.isRequired())
           );
         } else {

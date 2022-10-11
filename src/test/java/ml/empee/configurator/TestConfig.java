@@ -25,7 +25,7 @@ class TestConfig {
     JavaPlugin plugin = mock(JavaPlugin.class);
     when(plugin.getDataFolder()).thenReturn(new File("src/test/resources"));
 
-    MyConfiguration config = ConfigurationProcessor.loadConfiguration(new MyConfiguration(plugin));
+    MyConfiguration config = ConfigurationProcessor.processConfiguration(new MyConfiguration(plugin));
     assert config.wordAsDouble == 11.2;
     assert !config.bool;
     assert config.decimal == 10.4;
@@ -40,15 +40,15 @@ class TestConfig {
     JavaPlugin plugin = mock(JavaPlugin.class);
     when(plugin.getDataFolder()).thenReturn(new File("src/test/resources"));
 
-    Config testNonExisting = new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    Config testNonExisting = new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path(value = "nonExistingPath", required = true)
       private Double decimal;
     };
 
-    assertThrows(MalformedConfigurationException.class, () -> ConfigurationProcessor.loadConfiguration(testNonExisting));
+    assertThrows(MalformedConfigurationException.class, () -> ConfigurationProcessor.processConfiguration(testNonExisting));
 
-    assert ConfigurationProcessor.loadConfiguration(new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    assert ConfigurationProcessor.processConfiguration(new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path(value = "nonExistingPath")
       private Double decimal;
@@ -60,23 +60,23 @@ class TestConfig {
     JavaPlugin plugin = mock(JavaPlugin.class);
     when(plugin.getDataFolder()).thenReturn(new File("src/test/resources"));
 
-    Config expectLowerThenMin = new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    Config expectLowerThenMin = new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("double")
       @Constraint(min = "10.5")
       private Double decimal;
     };
-    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.loadConfiguration(expectLowerThenMin));
+    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.processConfiguration(expectLowerThenMin));
 
-    Config expextHigherThenMax = new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    Config expextHigherThenMax = new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("double")
       @Constraint(max = "10.2")
       private Double decimal;
     };
-    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.loadConfiguration(expextHigherThenMax));
+    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.processConfiguration(expextHigherThenMax));
 
-    ConfigurationProcessor.loadConfiguration(new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    ConfigurationProcessor.processConfiguration(new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("double")
       @Constraint(min = "10.2", max = "10.5")
@@ -89,30 +89,30 @@ class TestConfig {
     JavaPlugin plugin = mock(JavaPlugin.class);
     when(plugin.getDataFolder()).thenReturn(new File("src/test/resources"));
 
-    Config expectGreaterThen = new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    Config expectGreaterThen = new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("section.string")
       @Constraint(length = 10)
       private String string;
     };
-    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.loadConfiguration(expectGreaterThen));
+    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.processConfiguration(expectGreaterThen));
 
-    ConfigurationProcessor.loadConfiguration(new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    ConfigurationProcessor.processConfiguration(new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("section.string")
       @Constraint(length = 30, notBlank = true)
       private String string;
     });
 
-    Config expectPatternViolation = new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    Config expectPatternViolation = new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("section.string")
       @Constraint(pattern = "[0-9]")
       private String string;
     };
-    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.loadConfiguration(expectPatternViolation));
+    assertThrows(ConstraintViolation.class, () -> ConfigurationProcessor.processConfiguration(expectPatternViolation));
 
-    ConfigurationProcessor.loadConfiguration(new ConfigFile(plugin, "SimpleConfig.yml", false) {
+    ConfigurationProcessor.processConfiguration(new ConfigFile(plugin, "SimpleConfig.yml") {
       @Setter
       @Path("section.string")
       @Constraint(pattern = ".*")
@@ -150,7 +150,7 @@ class TestConfig {
     private ConfigurationSection secondSection;
 
     public MyConfiguration(JavaPlugin plugin) {
-      super(plugin, "SimpleConfig.yml", false);
+      super(plugin, "SimpleConfig.yml");
     }
 
     @Setter(AccessLevel.PRIVATE)
