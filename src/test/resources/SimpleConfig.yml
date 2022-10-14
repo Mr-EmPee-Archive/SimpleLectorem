@@ -1,5 +1,7 @@
+#Old comment
 bool: false
 string: "11.2"
+#Old comment
 double: 10.4
 int: -2
 stringList:

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,6 +46,7 @@ class ConfigurationUpdaterTest {
     protected void runUpdate(YamlConfiguration config) throws IOException {
       config.set("bool", config.getDouble("double") > 0);
       moveFile(config, "MovedConfig.yml");
+      setComments("bool", Arrays.asList("This is a comment"));
     }
 
   }
