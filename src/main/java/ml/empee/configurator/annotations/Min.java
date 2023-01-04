@@ -7,16 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Constraint {
-
-  String min() default "";
-
-  String max() default "";
-
-  String pattern() default "";
-
-  boolean notBlank() default false;
-
-  int length() default Integer.MAX_VALUE;
-
+public @interface Min {
+  double value();
 }

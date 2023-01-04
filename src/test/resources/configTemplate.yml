@@ -1,0 +1,20 @@
+bool: false
+string: '11.2'
+double: 10.4
+int: -2
+stringList:
+  - Hello
+  - World
+section: #Rip!
+  string: Hello from section1!
+  section:
+    string: Hello from section2!
+enum: TEST
+#Lol
+enumList:
+  - TEST
+  - TEST2
+location:
+  x: 1
+  y: 2
+  z: 3
