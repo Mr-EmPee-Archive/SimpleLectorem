@@ -40,7 +40,7 @@ public abstract class Configuration {
     this.previousVersion = previousVersion;
     this.config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), path));
 
-    if (config.getInt("version", 1) == version) {
+    if (config.getInt("config-version", 1) == version) {
       inject();
     } else {
       update();
@@ -65,7 +65,7 @@ public abstract class Configuration {
 
     previousVersion.update(previousVersion.config);
     config = previousVersion.config;
-    config.set("version", version);
+    config.set("config-version", version);
 
     config.save(new File(plugin.getDataFolder(), filePath));
     inject();
