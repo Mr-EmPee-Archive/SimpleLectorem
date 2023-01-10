@@ -4,6 +4,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +35,9 @@ public abstract class Configuration {
   }
 
   protected Configuration(String path, int version, Configuration previousVersion) {
-    plugin.saveResource(path, false);
+    if(!new File(plugin.getDataFolder(), path).exists()) {
+      plugin.saveResource(path, false);
+    }
 
     this.version = version;
     this.filePath = path;
