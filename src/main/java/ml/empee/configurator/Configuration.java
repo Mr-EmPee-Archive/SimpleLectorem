@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +23,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class Configuration {
 
   private final JavaPlugin plugin = JavaPlugin.getProvidingPlugin(getClass());
-  private final String filePath;
+  private final ConfigManager configManager = ConfigManager.getInstance();
+
+  private final File file;
+  private final String path;
   @Getter
   private final int version;
   private final Configuration previousVersion;
@@ -35,14 +37,16 @@ public abstract class Configuration {
   }
 
   protected Configuration(String path, int version, Configuration previousVersion) {
-    if(!new File(plugin.getDataFolder(), path).exists()) {
+    this.file = new File(plugin.getDataFolder(), path);
+    this.path = path;
+
+    if(!file.exists()) {
       plugin.saveResource(path, false);
     }
 
     this.version = version;
-    this.filePath = path;
     this.previousVersion = previousVersion;
-    this.config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), path));
+    this.config = YamlConfiguration.loadConfiguration(file);
 
     if (config.getInt("config-version", 1) == version) {
       inject();
@@ -52,26 +56,29 @@ public abstract class Configuration {
   }
 
   @SneakyThrows
-  protected void updateComments() {
-    plugin.saveResource(filePath, true);
-    YamlConfiguration newConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), filePath));
+  protected void replaceWithResourceConfig() {
+    Files.delete(file.toPath());
+    plugin.saveResource(path, false);
+
+    YamlConfiguration newConfig = YamlConfiguration.loadConfiguration(file);
     config.getKeys(true).forEach(key -> {
       newConfig.set(key, config.get(key));
     });
-    newConfig.save(new File(plugin.getDataFolder(), filePath));
+
+    newConfig.save(file);
   }
 
   @SneakyThrows
   private void update() {
     if (previousVersion == null) {
-      throw new MisconfigurationException(filePath, null, "No previous version found");
+      throw new MisconfigurationException(path, null, "No previous version found");
     }
 
     previousVersion.update(previousVersion.config);
     config = previousVersion.config;
     config.set("config-version", version);
 
-    config.save(new File(plugin.getDataFolder(), filePath));
+    config.save(file);
     inject();
   }
 
@@ -92,14 +99,14 @@ public abstract class Configuration {
           value = castToCustom(field, value).get();
         } else {
           throw MisconfigurationException.builder()
-              .filePath(filePath)
+              .filePath(path)
               .configPath(path)
               .message("Expected " + field.getType().getSimpleName() + " but got " + value.getClass().getSimpleName())
               .build();
         }
       }
 
-      FieldValidator.validate(filePath, field, value);
+      FieldValidator.validate(path, field, value);
 
       try {
         setter.setAccessible(true);
@@ -116,7 +123,7 @@ public abstract class Configuration {
     }
 
     Method setter = getFieldSetter(field);
-    ConfigParser<?> parser = ConfigManager.getParser(setter.getParameterTypes()[0]);
+    ConfigParser<?> parser = configManager.getParser(setter.getParameterTypes()[0]);
     if (parser != null) {
       return Optional.ofNullable(parser.parse((MemorySection) value));
     }
