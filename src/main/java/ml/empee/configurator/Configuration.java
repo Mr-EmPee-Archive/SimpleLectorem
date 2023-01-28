@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class Configuration {
 
-  private final JavaPlugin plugin = JavaPlugin.getProvidingPlugin(getClass());
+  private final JavaPlugin plugin;
   private final ConfigManager configManager = ConfigManager.getInstance();
 
   private final File file;
@@ -32,12 +32,13 @@ public abstract class Configuration {
   private final Configuration previousVersion;
   private YamlConfiguration config;
 
-  protected Configuration(String path, int version) {
-    this(path, version, null);
+  protected Configuration(JavaPlugin plugin, String path, int version) {
+    this(plugin, path, version, null);
   }
 
-  protected Configuration(String path, int version, Configuration previousVersion) {
+  protected Configuration(JavaPlugin plugin, String path, int version, Configuration previousVersion) {
     this.file = new File(plugin.getDataFolder(), path);
+    this.plugin = plugin;
     this.path = path;
 
     if(!file.exists()) {

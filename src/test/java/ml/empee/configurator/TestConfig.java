@@ -6,15 +6,16 @@ import lombok.Getter;
 import lombok.Setter;
 import ml.empee.configurator.annotations.Path;
 import org.bukkit.Location;
+import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter @Setter(AccessLevel.PRIVATE)
 public class TestConfig extends Configuration {
-  public TestConfig() {
-    super("configTemplate.yml", 1);
+  public TestConfig(JavaPlugin plugin) {
+    super(plugin, "configTemplate.yml", 1);
   }
 
-  public TestConfig(int version, Configuration nextVersion) {
-    super("configTemplate.yml", version, nextVersion);
+  public TestConfig(JavaPlugin plugin, int version, Configuration nextVersion) {
+    super(plugin, "configTemplate.yml", version, nextVersion);
   }
 
   @Path("enum")

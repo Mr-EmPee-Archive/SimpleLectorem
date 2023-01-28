@@ -2,7 +2,6 @@ package ml.empee.configurator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.io.File;
@@ -21,7 +20,6 @@ import ml.empee.configurator.updates.UpTestConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +33,6 @@ class ConfigParsingTest {
   @BeforeAll
   static void setupClass() {
     Mockito.when(plugin.getDataFolder()).thenReturn(resource);
-    Mockito.mockStatic(JavaPlugin.class).when(() -> JavaPlugin.getProvidingPlugin(any())).thenReturn(plugin);
     Mockito.mockStatic(Bukkit.class).when(() -> Bukkit.getWorld(anyString())).thenReturn(null);
   }
 
@@ -49,7 +46,7 @@ class ConfigParsingTest {
 
   @Test
   void shouldParseConfig() {
-    TestConfig config = new TestConfig();
+    TestConfig config = new TestConfig(plugin);
 
     assertEquals(11.2, config.getWordAsDouble());
     assertEquals(TestConfig.TestEnum.TEST, config.getTestEnum());
@@ -62,7 +59,7 @@ class ConfigParsingTest {
 
   @Test
   void shouldValidateConfigs() {
-    new Configuration("config.yml", 1) {
+    new Configuration(plugin, "config.yml", 1) {
       @Path("double") @Min(10)
       private Double decimal;
 
@@ -70,7 +67,7 @@ class ConfigParsingTest {
         this.decimal = decimal;
       }
     };
-    assertThrows(MisconfigurationException.class, () -> new Configuration("config.yml", 1) {
+    assertThrows(MisconfigurationException.class, () -> new Configuration(plugin, "config.yml", 1) {
       @Path("double") @Min(15)
       private Double decimal;
 
@@ -79,7 +76,7 @@ class ConfigParsingTest {
       }
     });
 
-    new Configuration("config.yml", 1) {
+    new Configuration(plugin, "config.yml", 1) {
       @Path("double") @Max(15)
       private Double decimal;
 
@@ -87,7 +84,7 @@ class ConfigParsingTest {
         this.decimal = decimal;
       }
     };
-    assertThrows(MisconfigurationException.class, () -> new Configuration("config.yml", 1) {
+    assertThrows(MisconfigurationException.class, () -> new Configuration(plugin, "config.yml", 1) {
       @Path("double") @Max(10.2)
       private Double decimal;
 
@@ -96,7 +93,7 @@ class ConfigParsingTest {
       }
     });
 
-    new Configuration("config.yml", 1) {
+    new Configuration(plugin, "config.yml", 1) {
       @Path("stringList") @RegEx("[A-Z][a-z]*")
       private List<String> stringList;
 
@@ -105,7 +102,7 @@ class ConfigParsingTest {
       }
     };
 
-    assertThrows(MisconfigurationException.class, () -> new Configuration("config.yml", 1) {
+    assertThrows(MisconfigurationException.class, () -> new Configuration(plugin, "config.yml", 1) {
       @Path("stringList") @RegEx("[A-Z]*")
       private List<String> stringList;
 
@@ -114,7 +111,7 @@ class ConfigParsingTest {
       }
     });
 
-    new Configuration("config.yml", 1) {
+    new Configuration(plugin, "config.yml", 1) {
       @Path("stringList") @Required
       private List<String> stringList;
 
@@ -123,7 +120,7 @@ class ConfigParsingTest {
       }
     };
 
-    assertThrows(MisconfigurationException.class, () -> new Configuration("config.yml", 1) {
+    assertThrows(MisconfigurationException.class, () -> new Configuration(plugin, "config.yml", 1) {
       @Path("stringListNonExisting") @Required
       private List<String> stringList;
 
@@ -135,7 +132,7 @@ class ConfigParsingTest {
 
   @Test
   void shouldUpdateConfig() {
-    UpTestConfig config = new UpTestConfig();
+    UpTestConfig config = new UpTestConfig(plugin);
     assertEquals(false, config.getBool());
   }
 
